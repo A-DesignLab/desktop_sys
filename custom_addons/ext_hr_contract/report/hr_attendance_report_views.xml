@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <record id="hr_attendance_report_view_pivot" model="ir.ui.view">
+            <field name="name">hr.attendance.report.view.pivot</field>
+            <field name="model">hr.attendance.report</field>
+            <field name="inherit_id" ref="hr_attendance.hr_attendance_report_view_pivot"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name= 'overtime_hours']" position="after">
+                    <field name="bonus_hours" type="measure" widget="float_time"/>
+                    <field name="deduct_hours" type="measure" widget="float_time"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
+
