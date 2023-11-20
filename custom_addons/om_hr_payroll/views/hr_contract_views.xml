@@ -36,34 +36,32 @@
 
             <xpath expr="//group[@name='salary_info']" position="after">
                 <group string="Monthly Advantages in Cash" name='allowances'>
-                    <label for="gov_fees"/>
+                    <label for="hra"/>
                     <div class="o_row">
-
-                        <field name="gov_fees" nolabel="1"/>
+                        <field name="hra" nolabel="1"/>
                         <span>/ month</span>
                     </div>
-                    <label for="transport"/>
+                    <label for="da"/>
                     <div class="o_row">
-
-                        <field name="transport" nolabel="1"/>
+                        <field name="da" nolabel="1"/>
                         <span>/ month</span>
                     </div>
-                    <label for="insurance"/>
+                    <label for="travel_allowance"/>
                     <div class="o_row">
 
-                        <field name="insurance" nolabel="1"/>
+                        <field name="travel_allowance" nolabel="1"/>
                         <span>/ month</span>
                     </div>
-                    <label for="substance"/>
+                    <label for="meal_allowance"/>
                     <div class="o_row">
 
-                        <field name="substance" nolabel="1"/>
+                        <field name="meal_allowance" nolabel="1"/>
                         <span>/ month</span>
                     </div>
-                    <label for="housing"/>
+                    <label for="medical_allowance"/>
                     <div class="o_row">
 
-                        <field name="housing" nolabel="1"/>
+                        <field name="medical_allowance" nolabel="1"/>
                         <span>/ month</span>
                     </div>
                     <label for="other_allowance"/>

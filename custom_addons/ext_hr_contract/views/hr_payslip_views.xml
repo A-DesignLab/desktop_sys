@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Hr Payslip View -->
+    <record id="hr_payslip_form_inherit" model="ir.ui.view">
+        <field name="name">hr.payslip.view.form.inherit</field>
+        <field name="model">hr.payslip</field>
+        <field name="inherit_id" ref="om_hr_payroll.view_hr_payslip_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button string="Send To Admin" name="action_send_to_admin_approve" attrs="{'invisible': [('state', '!=', 'draft')]}" groups="om_hr_payroll.group_hr_payroll_manager" type="object" class="oe_highlight"/>
+                <button string="Send To Super Admin" name="action_send_to_super_admin" attrs="{'invisible': [('state', '!=', 'first_approve')]}" groups="ext_hr_contract.group_hr_payroll_admin" type="object" class="oe_highlight"/>
+            </xpath>
+            <button name="action_payslip_done" position="replace">
+                <button name="action_payslip_done" string="Confirm" type="object" attrs="{'invisible': [('state', '!=', 'second_approve')]}" groups="ext_hr_contract.group_hr_payroll_super_admin" class="oe_highlight"/>
+            </button>
+            <field name="state" position="replace">
+                <field name="state" widget="statusbar" statusbar_visible="draft,confirm"/>
+            </field>
+            <xpath expr="//page[4]" position="inside">
+                <group string="Remanining Allowance">
+                    <group>
+                        <field name="remaining_gov_fees_awl"/>
+                        <field name="remaining_substance_awl"/>
+                        <field name="remaining_medical_alw"/>
+                        <field name="remaining_travel_alw"/>
+                        <field name="remaining_housing_alw"/>
+                        <field name="remaining_salary"/>
+                    </group>
+                    <group>
+                        <field name="remaining_total"/>
+                    </group>
+                </group>
+            </xpath>
+            <xpath expr="//field[@name='credit_note']" position="after">
+                <field name="employee_bonus"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

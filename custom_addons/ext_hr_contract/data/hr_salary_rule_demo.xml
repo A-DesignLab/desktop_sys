@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="hr_salary_rule_substance" model="hr.salary.rule">
+        <field name="amount_select">code</field>
+        <field name="code">substance</field>
+        <field name="category_id" ref="om_hr_payroll.ALW"/>
+        <field name="name">Substance Allowance</field>
+        <field name="amount_python_compute">result = contract.substance</field>
+        <field name="sequence" eval="99"/>
+    </record>
+    <record id="hr_salary_rule_bonus" model="hr.salary.rule">
+        <field name="amount_select">code</field>
+        <field name="code">FIXBONUS</field>
+        <field name="category_id" ref="om_hr_payroll.ALW"/>
+        <field name="name">Employee Bonus</field>
+        <field name="amount_python_compute">result = payslip.employee_bonus</field>
+        <field name="sequence" eval="101"/>
+    </record>
+    <record id="hr_salary_rule_gov_fees" model="hr.salary.rule">
+        <field name="amount_select">code</field>
+        <field name="code">gvf</field>
+        <field name="name">Gov Fees Allowance</field>
+        <field name="category_id" ref="om_hr_payroll.ALW"/>
+        <field name="amount_python_compute">result = contract.gov_fees</field>
+        <field name="sequence" eval="101"/>
+    </record>
+    <record id="hr_salary_rule_deduction_bonus" model="hr.salary.rule">
+        <field name="amount_select">code</field>
+        <field name="code">DECBONUS</field>
+        <field name="name">Bouns Deduction</field>
+        <field name="category_id" ref="om_hr_payroll.DED"/>
+        <field name="amount_python_compute">result = deduction</field>
+        <field name="sequence" eval="101"/>
+    </record>
+    <record id="hr_salary_rule_allowance" model="hr.salary.rule">
+        <field name="amount_select">code</field>
+        <field name="code">EXTBONUS</field>
+        <field name="name">Bonus Allowance</field>
+        <field name="category_id" ref="om_hr_payroll.ALW"/>
+        <field name="amount_python_compute">result = overtime</field>
+        <field name="sequence" eval="101"/>
+    </record>
+
+    <record id="structure_base_employee" model="hr.payroll.structure">
+        <field name="code">Employee</field>
+        <field name="name">Employee Structure</field>
+        <field eval="[(6, 0, [('1'), ref('hr_salary_rule_gov_fees'), ref('hr_salary_rule_bonus'),
+        ref('hr_salary_rule_substance'), ('3'), ('5'), ('7'), ('2'), ('8')])]" name="rule_ids"/>
+        <field name="company_id" ref="base.main_company"/>
+    </record>
+
+    <record id="structure_base_worker" model="hr.payroll.structure">
+        <field name="code">Worker</field>
+        <field name="name">Worker Structure</field>
+        <field eval="[(6, 0, [('1'), ref('hr_salary_rule_gov_fees'), ref('hr_salary_rule_deduction_bonus'),
+         ref('hr_salary_rule_allowance'), ref('hr_salary_rule_substance'), ('3'), ('5'), ('7'), ('2'), ('8')])]" name="rule_ids"/>
+        <field name="company_id" ref="base.main_company"/>
+    </record>
+
+</odoo>
+        

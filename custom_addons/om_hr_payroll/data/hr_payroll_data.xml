@@ -13,56 +13,6 @@
             <field name="amount_python_compute">result = contract.wage</field>
         </record>
 
-        <record id="hr_rule_transport" model="hr.salary.rule">
-            <field name="name">Transport Allowance</field>
-            <field name="sequence" eval="5"/>
-            <field name="code">Trans</field>
-            <field name="category_id" ref="om_hr_payroll.ALW"/>
-            <field name="condition_select">none</field>
-            <field name="amount_select">code</field>
-            <field name="amount_python_compute">result = contract.transport</field>
-        </record>
-
-        <record id="hr_rule_substance" model="hr.salary.rule">
-            <field name="name">Substance Allowance</field>
-            <field name="sequence" eval="5"/>
-            <field name="code">Subs</field>
-            <field name="category_id" ref="om_hr_payroll.ALW"/>
-            <field name="condition_select">none</field>
-            <field name="amount_select">code</field>
-            <field name="amount_python_compute">result = contract.substance</field>
-        </record>
-
-        <record id="hr_rule_insurance" model="hr.salary.rule">
-            <field name="name">Insurance Allowance</field>
-            <field name="sequence" eval="5"/>
-            <field name="code">Ins</field>
-            <field name="category_id" ref="om_hr_payroll.ALW"/>
-            <field name="condition_select">none</field>
-            <field name="amount_select">code</field>
-            <field name="amount_python_compute">result = contract.insurance</field>
-        </record>
-
-        <record id="hr_rule_housing" model="hr.salary.rule">
-            <field name="name">Housing Allowance</field>
-            <field name="sequence" eval="5"/>
-            <field name="code">House</field>
-            <field name="category_id" ref="om_hr_payroll.ALW"/>
-            <field name="condition_select">none</field>
-            <field name="amount_select">code</field>
-            <field name="amount_python_compute">result = contract.housing</field>
-        </record>
-
-        <record id="hr_rule_gov_fees" model="hr.salary.rule">
-            <field name="name">Government Fees Allowance</field>
-            <field name="sequence" eval="5"/>
-            <field name="code">Gov</field>
-            <field name="category_id" ref="om_hr_payroll.ALW"/>
-            <field name="condition_select">none</field>
-            <field name="amount_select">code</field>
-            <field name="amount_python_compute">result = contract.gov_fees</field>
-        </record>
-
         <record id="hr_rule_taxable" model="hr.salary.rule">
             <field name="name">Gross</field>
             <field name="sequence" eval="100"/>

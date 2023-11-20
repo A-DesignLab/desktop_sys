@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_employee_payslip_report_form" model="ir.ui.view">
+        <field name="name">employee.payslip.report</field>
+        <field name="model">employee.payslip.report</field>
+        <field name="arch" type="xml">
+            <form string="=Employee Payslip Report">
+                <group>
+                    <group>
+                        <field name="start_date"/>
+                        <field name="end_date"/>
+                    </group>
+                    <group>
+                        <field name="employee_id"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="print_report" type="object" string="Print" class="btn-primary"/>
+                    <button special="cancel" string="Cancel" class="btn-default"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_pos_excel_report_form" model="ir.ui.view">
+        <field name="name">employee.report.form</field>
+        <field name="model">employee.payslip.excel.report</field>
+        <field name="arch" type="xml">
+            <form>
+                <b>
+                    <h4>Click on the report file name to download the excel file.</h4>
+                </b>
+                <br/>
+                <group>
+                    <field name="excel_file" readonly="1" filename="file_name"/>
+                    <field name="file_name" invisible="1"/>
+                </group>
+                <footer>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_view_employee_payslip_report_form">
+        <field name="name">Employee Payslip Report</field>
+        <field name="res_model">employee.payslip.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_hr_payroll_reporting"
+            name="Report" parent="om_hr_payroll.menu_hr_payroll_root"
+            sequence="200"/>
+        
+    <menuitem name="Employee Payslip Report" 
+        id="menu_employee_payslip_report"
+        parent="ext_hr_contract.menu_hr_payroll_reporting" 
+        action="action_view_employee_payslip_report_form" 
+        sequence="1"/>
+    <menuitem name="Annual Remaining"
+                  id="menu_annual_remaining_tree"
+                  parent="ext_hr_contract.menu_hr_payroll_reporting"
+                  action="action_view_annual_remaining_form"/>
+
+</odoo>
