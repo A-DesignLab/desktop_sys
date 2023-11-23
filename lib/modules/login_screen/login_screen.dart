@@ -164,17 +164,29 @@ class _LoginScreenState extends State<LoginScreen> {
                     if (formKey.currentState!.validate()) {
                       // If the form is valid, display a snackbar. In the real world,
                       // you'd often call a server or save the information in a database.
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('All Done!'),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  const MyHomePage()));
+                      if(emailController.text == 'admin@gmail.com' && passwordController.text == 'Admin2030')
+                      {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('All Done!'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                const MyHomePage()));
+                      }else
+                      {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Account is not Registered!'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+
                     }
                   },
                   child: const Text('Submit'),

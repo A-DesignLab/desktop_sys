@@ -180,3 +180,41 @@ Widget customCard({
         ),
       ),
     );
+
+
+// Alert Dialog
+Future<void> dialogBuilder({
+  required BuildContext context,
+  required VoidCallback enableOnTap,
+  required VoidCallback disableOnTap,
+  required String title,
+  required String disableTitle,
+  required String enableTitle,
+  required Widget contentWidget,
+}) {
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title:  Text(title),
+        content: contentWidget,
+        actions: <Widget>[
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            onPressed: disableOnTap,
+            child: Text(disableTitle),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            onPressed: enableOnTap,
+            child: Text(enableTitle),
+          ),
+        ],
+      );
+    },
+  );
+}
