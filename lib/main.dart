@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'shared/components/constants.dart';
-import 'shared/network/local/cache_helper.dart';
 import 'splash_screen.dart';
 
-void main() async {
-  await CacheHelper.init();
-  employeesList = CacheHelper.getData(key: 'employees');
-
+void main() {
   runApp(const MyApp());
 }
 
