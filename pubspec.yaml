@@ -37,6 +37,32 @@ dependencies:
   cupertino_icons: ^1.0.2
   loading_animation_widget: ^1.2.0+4
   easy_search_bar: ^2.5.0
+  percent_indicator: ^4.0.1
+
+  font_awesome_flutter: ^10.6.0
+  carousel_pro_nullsafety: ^1.0.2
+  lecle_flutter_carousel_pro: ^0.0.1
+  shared_preferences: ^2.2.2
+  fluttertoast: ^8.2.4
+  intl: ^0.18.1
+  bloc: ^8.1.2
+  flutter_bloc: ^8.1.3
+  conditional_builder_null_safety: ^0.0.6
+  hexcolor: ^3.0.1
+  data_table_2: ^2.5.9
+  uuid: ^4.0.0
+
+
+  # Remote Packages
+  dio: ^5.3.3
+  http: ^1.1.0
+
+  # firebase
+  firebase_core: ^2.22.0
+  firebase_auth: ^4.13.0
+  cloud_firestore: ^4.13.0
+  firebase_storage: ^11.5.0
+  google_sign_in: ^6.1.6
 
 dev_dependencies:
   flutter_test:

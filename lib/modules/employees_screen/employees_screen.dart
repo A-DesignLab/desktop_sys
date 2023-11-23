@@ -1,19 +1,27 @@
+
 import 'package:flutter/material.dart';
 
+import '../../models/users_model.dart';
 import '../../shared/components/components.dart';
 import '../../shared/components/constants.dart';
-import 'labourers_screen/labourers_screen.dart';
+import 'employees.dart';
 
 class EmployeesScreen extends StatelessWidget {
   const EmployeesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final managementEmployeesList = managementEmployees;
+    final designersEmployeesList = designingEmployees;
+    final engineersEmployeesList = engineeringEmployees;
+    final supervisorsEmployeesList = supervisorsEmployees;
+    final laboursEmployeesList = laboursEmployees;
     var height = MediaQuery.of(context).size.height;
     List<String> employeesPosition = [
       'Management',
       'Designers',
       'Engineers',
+      'Supervisors',
       'Labourers',
     ];
 
@@ -35,7 +43,7 @@ class EmployeesScreen extends StatelessWidget {
               //mainAxisAlignment: MainAxisAlignment.center,
               children: [
 
-                // Finance Card
+                // Management Employees Card
                 customCard(
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -44,12 +52,13 @@ class EmployeesScreen extends StatelessWidget {
                         backgroundColor: Colors.green,
                       ),
                     );
+                    navigateTo(context, AllEmployees(user: managementEmployeesList,));
                   },
                   title: employeesPosition[0],
                 ),
                 SizedBox(width: height * 0.03,),
 
-                // Projects Card
+                // Designers Employees  Card
                 customCard(
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -58,12 +67,13 @@ class EmployeesScreen extends StatelessWidget {
                         backgroundColor: Colors.red,
                       ),
                     );
+                    navigateTo(context, AllEmployees(user: designersEmployeesList,));
                   },
                   title: employeesPosition[1],
                 ),
                 SizedBox(width: height * 0.03,),
 
-                // Vat Card
+                // Engineers Employees Card
                 customCard(
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -72,12 +82,13 @@ class EmployeesScreen extends StatelessWidget {
                         backgroundColor: Colors.blue,
                       ),
                     );
+                    navigateTo(context, AllEmployees(user: engineersEmployeesList,));
                   },
                   title: employeesPosition[2],
                 ),
                 SizedBox(width: height * 0.03,),
 
-                // Employees Card
+                // Supervisors Employees Card
                 customCard(
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -86,11 +97,26 @@ class EmployeesScreen extends StatelessWidget {
                         backgroundColor: Colors.black,
                       ),
                     );
-                    navigateTo(context, const LabourersScreen());
+                    navigateTo(context, AllEmployees(user: supervisorsEmployeesList,));
+                   // navigateTo(context, EmployeeDetailsScreen());
                   },
                   title: employeesPosition[3],
                 ),
 
+                // Labours Employees Card
+                customCard(
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(employeesPosition[4]),
+                        backgroundColor: Colors.black,
+                      ),
+                    );
+                    navigateTo(context, AllEmployees(user: laboursEmployeesList,));
+                    // navigateTo(context, EmployeeDetailsScreen());
+                  },
+                  title: employeesPosition[4],
+                ),
 
               ],
             ),
