@@ -51,6 +51,9 @@ dependencies:
   hexcolor: ^3.0.1
   data_table_2: ^2.5.9
   uuid: ^4.0.0
+  image_picker: ^1.0.4
+  image_picker_windows: ^0.2.1+1
+  file_picker: ^6.1.1
 
 
   # Remote Packages

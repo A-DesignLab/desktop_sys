@@ -15,6 +15,7 @@ class AllEmployees extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     employeesList = CacheHelper.getData(key: 'employees');
+
     final scaffoldKey = GlobalKey<ScaffoldState>();
     final users = user;
     return Scaffold(

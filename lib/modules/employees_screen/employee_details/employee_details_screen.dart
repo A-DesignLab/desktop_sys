@@ -1,12 +1,13 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../../shared/components/components.dart';
 import '../../../shared/components/constants.dart';
 import 'salaries_payroll/payroll_all_month_screen.dart';
-import 'salaries_payroll/payroll_screen.dart';
 import 'salaries_payroll/payslip_screen.dart';
 
 // This is the type used by the popup menu below.
@@ -15,7 +16,9 @@ enum SampleItem { itemOne, itemTwo, itemThree }
 class EmployeeDetailsScreen extends StatefulWidget {
   final String employeeID;
   final Map<String, Object> user;
-  const EmployeeDetailsScreen({super.key, required this.employeeID, required this.user});
+
+  const EmployeeDetailsScreen(
+      {super.key, required this.employeeID, required this.user});
 
   @override
   State<EmployeeDetailsScreen> createState() => _EmployeeDetailsScreenState();
@@ -23,9 +26,8 @@ class EmployeeDetailsScreen extends StatefulWidget {
 
 class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
     with SingleTickerProviderStateMixin {
-
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-  GlobalKey<RefreshIndicatorState>();
+      GlobalKey<RefreshIndicatorState>();
 
   double hoursFromAPI = KHoursWorked;
 
@@ -36,11 +38,13 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
 
   SampleItem? selectedMenu;
 
+
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(vsync: this, length: 3);
-    }
+  }
 
   @override
   void dispose() {
@@ -48,8 +52,31 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
     super.dispose();
   }
 
+  // Image Picker Function
+
+  PlatformFile? selectImage;
+  File? imageFile;
+  void _pickFile() async
+  {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
+      dialogTitle: 'Select an Employee Picture!',
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'jpeg', 'gif', 'png']
+    );
+    if(result == null) return;
+    selectImage = result.files.single;
+    setState(() {
+      imageFile = File(selectImage!.path!);
+      imageFile = File(widget.user['image'].toString());
+    });
+
+    print(selectImage?.path);
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         elevation: 5,
@@ -57,19 +84,28 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
         centerTitle: true,
         actions: [
           customElevatedButton(
-            onPressed: ()
-            {
-              navigateTo(context, PayslipScreen(user: widget.user,));
+            onPressed: () {
+              navigateTo(
+                  context,
+                  PayslipScreen(
+                    user: widget.user,
+                  ));
             },
             text: 'Payslip',
             foregroundColor: const Color(0xFF311B92),
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 10.0, right: 10.0,),
+            padding: const EdgeInsets.only(
+              left: 10.0,
+              right: 10.0,
+            ),
             child: customElevatedButton(
-              onPressed: ()
-              {
-                navigateTo(context, PayrollAllMonthsScreen(user: widget.user,));
+              onPressed: () {
+                navigateTo(
+                    context,
+                    PayrollAllMonthsScreen(
+                      user: widget.user,
+                    ));
               },
               text: 'Payroll',
               foregroundColor: const Color(0xFF311B92),
@@ -121,17 +157,44 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
                 Row(
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        '${widget.user['image']}',
-                        width: 300,
-                        height: 200,
-                        fit: BoxFit.cover,
-                      ),
+                    Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: imageFile == null ? Image.network(
+                            '${widget.user['image']}',
+                            width: 300,
+                            height: 200,
+                            fit: BoxFit.cover,
+                          ) : Image.file(
+                            imageFile!, width: 300,
+                            height: 200,
+                            fit: BoxFit.fitHeight,
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 10,
+                          right: 10,
+                          child: Tooltip(
+                            message: 'Edit',
+                            child: IconButton(
+                              icon: const Icon(Icons.edit),
+                              color: const Color(0xFF311B92),
+                              style: IconButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                              ),
+                              onPressed: ()
+                              {
+                                _pickFile();
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(20, 0, 0, 0),
+                      padding:
+                          const EdgeInsetsDirectional.fromSTEB(20, 0, 0, 0),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,7 +204,8 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
                             style: const TextStyle(fontSize: 26),
                           ),
                           Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(0, 8, 0, 8),
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                0, 8, 0, 8),
                             child: Text(
                               'Job Title: ${widget.user['job_title']}',
                               style: const TextStyle(fontSize: 24),
@@ -155,7 +219,8 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(150, 0, 0, 0),
+                      padding:
+                          const EdgeInsetsDirectional.fromSTEB(150, 0, 0, 0),
                       child: CircularPercentIndicator(
                         percent: percentValue,
                         radius: 60,
@@ -163,8 +228,7 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
                         animation: true,
                         animateFromLastPercent: true,
                         animationDuration: 3000,
-                        onAnimationEnd: ()
-                        {
+                        onAnimationEnd: () {
                           print('Animation Finished');
                         },
                         progressColor: Colors.green,
@@ -237,7 +301,8 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
                             children: [
                               // Employee Information Tab
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
                                 children: [
                                   SizedBox(
                                     width: 700,
@@ -289,7 +354,6 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
                                       text9: "${widget.user['address']}",
                                     ),
                                   ),
-
                                 ],
                               ),
 
@@ -298,10 +362,10 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
                                 context: context,
                                 mainTitle: 'Contract Information\n',
                                 title1: 'About: ',
-                                text1:
-                                    '${widget.user['contract_about']}',
+                                text1: '${widget.user['contract_about']}',
                                 title2: 'Period:',
-                                text2: ' From ${widget.user['contract_start']} to ${widget.user['contract_end']}',
+                                text2:
+                                    ' From ${widget.user['contract_start']} to ${widget.user['contract_end']}',
                                 title3: 'Basic Salary: ',
                                 text3: '${widget.user['basic_salary']} SR',
                                 title4: 'Transportation: ',
@@ -328,7 +392,8 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
 
                               // Salary Information Tab
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
                                 children: [
                                   SizedBox(
                                     width: 700,
@@ -336,9 +401,11 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
                                       context: context,
                                       mainTitle: 'Employee Information\n',
                                       title1: 'Basic Salary: ',
-                                      text1: '${widget.user['basic_salary']} SR',
+                                      text1:
+                                          '${widget.user['basic_salary']} SR',
                                       title2: 'Transportation: ',
-                                      text2: '${widget.user['transportation']} SR',
+                                      text2:
+                                          '${widget.user['transportation']} SR',
                                       title3: 'Housing: ',
                                       text3: '${widget.user['housing']} SR',
                                       title4: 'Substance: ',
@@ -348,13 +415,17 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
                                       title6: 'Gov Fees: ',
                                       text6: '${widget.user['gov_fees']} SR',
                                       title7: 'Days per weak: ',
-                                      text7: '${widget.user['days_per_weak']} Days',
+                                      text7:
+                                          '${widget.user['days_per_weak']} Days',
                                       title8: 'Start day of weak: ',
-                                      text8: '${widget.user['start_day_of_weak']}',
+                                      text8:
+                                          '${widget.user['start_day_of_weak']}',
                                       title9: 'End day of weak: ',
-                                      text9: '${widget.user['end_day_of_weak']}',
+                                      text9:
+                                          '${widget.user['end_day_of_weak']}',
                                       title10: 'Hours per day: ',
-                                      text10: '${widget.user['hours_per_day']} Hours',
+                                      text10:
+                                          '${widget.user['hours_per_day']} Hours',
                                       title11: 'Attendance: ',
                                       text11: '${widget.user['attendance']}',
                                     ),
@@ -365,9 +436,11 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
                                       context: context,
                                       mainTitle: 'Employee Information\n',
                                       title1: 'Basic Salary: ',
-                                      text1: '${widget.user['basic_salary']} SR',
+                                      text1:
+                                          '${widget.user['basic_salary']} SR',
                                       title2: 'Transportation: ',
-                                      text2: '${widget.user['transportation']} SR',
+                                      text2:
+                                          '${widget.user['transportation']} SR',
                                       title3: 'Housing: ',
                                       text3: '${widget.user['housing']} SR',
                                       title4: 'Substance: ',
@@ -377,13 +450,17 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
                                       title6: 'Gov Fees: ',
                                       text6: '${widget.user['gov_fees']} SR',
                                       title7: 'Days per weak: ',
-                                      text7: '${widget.user['days_per_weak']} Days',
+                                      text7:
+                                          '${widget.user['days_per_weak']} Days',
                                       title8: 'Start day of weak: ',
-                                      text8: '${widget.user['start_day_of_weak']}',
+                                      text8:
+                                          '${widget.user['start_day_of_weak']}',
                                       title9: 'End day of weak: ',
-                                      text9: '${widget.user['end_day_of_weak']}',
+                                      text9:
+                                          '${widget.user['end_day_of_weak']}',
                                       title10: 'Hours per day: ',
-                                      text10: '${widget.user['hours_per_day']} Hours',
+                                      text10:
+                                          '${widget.user['hours_per_day']} Hours',
                                       title11: 'Attendance: ',
                                       text11: '${widget.user['attendance']}',
                                     ),
@@ -415,11 +492,8 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
         icon: const Icon(Icons.refresh),
         label: const Text('Refresh'),
       ),
-
     );
   }
-
-
 }
 
 Widget customTabBarView({
@@ -531,8 +605,7 @@ Widget customRichText({
       ),
     );
 
-Widget customElevatedButton(
-{
+Widget customElevatedButton({
   required VoidCallback onPressed,
   required String text,
   Color? backgroundColor,
@@ -541,19 +614,20 @@ Widget customElevatedButton(
   double? fontSize,
   String? fontFamily,
   EdgeInsetsGeometry? padding,
-}) => ElevatedButton(
-  onPressed: onPressed,
-  style: ElevatedButton.styleFrom(
-    backgroundColor: backgroundColor,
-    foregroundColor: foregroundColor,
-    padding: padding,
-    textStyle: TextStyle(
-      color: fontColor,
-      fontSize: fontSize,
-      fontFamily: fontFamily,
-    ),
-  ),
-  child: Text(
-    text,
-  ),
-);
+}) =>
+    ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
+        padding: padding,
+        textStyle: TextStyle(
+          color: fontColor,
+          fontSize: fontSize,
+          fontFamily: fontFamily,
+        ),
+      ),
+      child: Text(
+        text,
+      ),
+    );

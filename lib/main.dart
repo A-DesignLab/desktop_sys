@@ -1,8 +1,12 @@
+import 'package:desk_test/shared/components/constants.dart';
 import 'package:flutter/material.dart';
 
+import 'shared/network/local/cache_helper.dart';
 import 'splash_screen.dart';
 
-void main() {
+void main() async {
+  await CacheHelper.init();
+  employeesList = CacheHelper.getData(key: 'employees');
   runApp(const MyApp());
 }
 

@@ -801,8 +801,9 @@ class _ContractScreenState extends State<ContractScreen> {
               });
 
               /// TODO:: Save the new employee to list in SharedPreferences
-              String jsonData = jsonEncode(users);
+
               SharedPreferences prefs = await SharedPreferences.getInstance();
+              String jsonData = json.encode(users);
               prefs.setString("employees", jsonData);
               CacheHelper.saveData(
                   key: 'employees',
