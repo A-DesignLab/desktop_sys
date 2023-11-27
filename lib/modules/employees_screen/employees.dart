@@ -7,9 +7,11 @@ import '../../shared/components/constants.dart';
 import '../../shared/network/local/cache_helper.dart';
 import 'employee_details/contract/contract_screen.dart';
 import 'employee_details/employee_details_screen.dart';
+import 'employees_screen.dart';
 
 class AllEmployees extends StatelessWidget {
   final List<Map<String, Object>> user;
+
   const AllEmployees({super.key, required this.user});
 
   @override
@@ -21,18 +23,29 @@ class AllEmployees extends StatelessWidget {
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
+        leading: IconButton(
+            onPressed: () {
+              navigateTo(context, const EmployeesScreen());
+            },
+            icon: const Icon(
+              Icons.arrow_back_ios_new_outlined,
+              size: 20.0,
+            ),
+        ),
         title: const Text('Employees'),
         centerTitle: true,
-        actions:
-        [
+        actions: [
           TextButton(
-              onPressed: ()
-              {
-                navigateTo(context, ContractScreen(user: users,));
-              },
-              child: const Text(
-                'Add Employee',
-              ),
+            onPressed: () {
+              navigateTo(
+                  context,
+                  ContractScreen(
+                    user: users,
+                  ));
+            },
+            child: const Text(
+              'Add Employee',
+            ),
           ),
         ],
       ),
@@ -55,7 +68,12 @@ class AllEmployees extends StatelessWidget {
             highlightColor: Colors.green,
             onTap: () async {
               var user = users[index];
-              navigateTo(context, EmployeeDetailsScreen(employeeID: '${users[index]['id']}', user: user,));
+              navigateTo(
+                  context,
+                  EmployeeDetailsScreen(
+                    employeeID: '${users[index]['id']}',
+                    user: user,
+                  ));
             },
             child: Card(
               clipBehavior: Clip.antiAliasWithSaveLayer,
@@ -77,9 +95,15 @@ class AllEmployees extends StatelessWidget {
                       fit: BoxFit.cover,
                     ),
                   ),
-                  customCardDetails(title: 'Name: ', employeeTitle: '${users[index]['name']}'),
-                  customCardDetails(title: 'Email: ', employeeTitle: '${users[index]['email']}'),
-                  customCardDetails(title: 'Job: ', employeeTitle: '${users[index]['job_title']}'),
+                  customCardDetails(
+                      title: 'Name: ',
+                      employeeTitle: '${users[index]['name']}'),
+                  customCardDetails(
+                      title: 'Email: ',
+                      employeeTitle: '${users[index]['email']}'),
+                  customCardDetails(
+                      title: 'Job: ',
+                      employeeTitle: '${users[index]['job_title']}'),
                 ],
               ),
             ),
@@ -91,30 +115,29 @@ class AllEmployees extends StatelessWidget {
 }
 
 Widget customCardDetails({required String title, employeeTitle}) => Padding(
-  padding:
-  const EdgeInsetsDirectional.fromSTEB(20, 10, 0, 0),
-  child: Row(
-    mainAxisSize: MainAxisSize.max,
-    mainAxisAlignment: MainAxisAlignment.start,
-    children: [
-      Text(
-        title,
-        style: const TextStyle(
-          fontSize: 20,
-        ),
-      ),
-      Expanded(
-        child: Text(
-          employeeTitle,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            overflow: TextOverflow.ellipsis,
+      padding: const EdgeInsetsDirectional.fromSTEB(20, 10, 0, 0),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 20,
+            ),
           ),
-        ),
+          Expanded(
+            child: Text(
+              employeeTitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        ],
       ),
-    ],
-  ),
-);
+    );

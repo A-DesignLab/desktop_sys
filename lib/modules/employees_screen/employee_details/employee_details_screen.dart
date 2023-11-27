@@ -68,10 +68,10 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
     selectImage = result.files.single;
     setState(() {
       imageFile = File(selectImage!.path!);
-      imageFile = File(widget.user['image'].toString());
+      //imageFile = File(widget.user['image'].toString());
     });
 
-    print(selectImage?.path);
+    print(imageFile);
   }
 
   @override
@@ -167,7 +167,8 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen>
                             height: 200,
                             fit: BoxFit.cover,
                           ) : Image.file(
-                            imageFile!, width: 300,
+                            imageFile!,
+                            width: 300,
                             height: 200,
                             fit: BoxFit.fitHeight,
                           ),

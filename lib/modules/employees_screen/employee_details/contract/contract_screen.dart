@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -142,10 +144,32 @@ class _ContractScreenState extends State<ContractScreen> {
     super.dispose();
   }
 
+  // Image Picker Function
+
+  PlatformFile? selectImage;
+  File? imageFile;
+  void _pickFile() async
+  {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+        allowMultiple: true,
+        dialogTitle: 'Select an Employee Picture!',
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'gif', 'png']
+    );
+    if(result == null) return;
+    selectImage = result.files.single;
+    setState(() {
+      imageFile = File(selectImage!.path!);
+      //imageFile = File(widget.user['image'].toString());
+    });
+
+    print(imageFile);
+  }
+
   @override
   Widget build(BuildContext context) {
 
-    final List<Map<String, Object>> users = widget.user;
+    List<Map<String, Object>> users = widget.user;
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
@@ -196,7 +220,7 @@ class _ContractScreenState extends State<ContractScreen> {
 
                 // Address And Email Row
                 customInputRow(
-                  title1: "Address:",
+                  title1: "Employee Address:",
                   hintText1: "Address",
                   controller1: _addressController,
                   keyboardType1: TextInputType.text,
@@ -207,7 +231,7 @@ class _ContractScreenState extends State<ContractScreen> {
                     }
                     return null;
                   },
-                  title2: "Email:",
+                  title2: "Employee Email:",
                   hintText2: "Email",
                   controller2: _emailController,
                   keyboardType2: TextInputType.emailAddress,
@@ -676,44 +700,95 @@ class _ContractScreenState extends State<ContractScreen> {
                     return null;
                   },
                 ),
-
                 /// TODO:: Create image picker and camera picker to store image
                 // hours per Day And Attendance And Image Row
-                customDetailsRow(
-                  title1: "Hours per Day:",
-                  hintText1: "Hours per Day",
-                  controller1: _hoursPerDayController,
-                  keyboardType1: TextInputType.number,
-                  labelText1: 'Hours per Day',
-                  validator1: (String? value) {
-                    if (value!.isEmpty) {
-                      return 'Hours must mot be empty';
-                    }
-                    return null;
-                  },
-                  title2: "Attendance:",
-                  hintText2: "Attendance",
-                  controller2: _attendanceController,
-                  keyboardType2: TextInputType.number,
-                  labelText2: 'Attendance',
-                  validator2: (String? value) {
-                    if (value!.isEmpty) {
-                      return 'Attendance must mot be empty';
-                    }
-                    return null;
-                  },
-                  title3: "Image:",
-                  hintText3: "Image",
-                  controller3: _imageController,
-                  keyboardType3: TextInputType.number,
-                  labelText3: 'Image',
-                  validator3: (String? value) {
-                    if (value!.isEmpty) {
-                      return 'Image must mot be empty';
-                    }
-                    return null;
-                  },
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children:
+                    [
+                      Expanded(
+                        child: customInputRow(
+                          title1: "Hours per Day:",
+                          hintText1: "Hours per Day",
+                          controller1: _hoursPerDayController,
+                          keyboardType1: TextInputType.number,
+                          labelText1: 'Hours per Day',
+                          validator1: (String? value) {
+                            if (value!.isEmpty) {
+                              return 'Hours must mot be empty';
+                            }
+                            return null;
+                          },
+                          title2: "Attendance:",
+                          hintText2: "Attendance",
+                          controller2: _attendanceController,
+                          keyboardType2: TextInputType.number,
+                          labelText2: 'Attendance',
+                          validator2: (String? value) {
+                            if (value!.isEmpty) {
+                              return 'Attendance must mot be empty';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 400,),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 150.0,),
+                        child: Row(
+                          children: [
+                            const Text(
+                              'Image: ',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 20.0),
+                              child: Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: imageFile == null ? Image.network(
+                                      'http://anastomosisdesignlab.com/static/media/aboutImg.ca6be5f62633267f4b00.png',
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                    ) : Image.file(
+                                      imageFile!,
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.fitHeight,
+                                    ),
+                                  ),
+                                  Positioned(
+                                    bottom: 10,
+                                    right: 10,
+                                    child: Tooltip(
+                                      message: 'Edit',
+                                      child: IconButton(
+                                        icon: const Icon(Icons.edit),
+                                        color: const Color(0xFF311B92),
+                                        style: IconButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                        ),
+                                        onPressed: ()
+                                        {
+                                          _pickFile();
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                 ),
+
               ],
             ),
           ),
@@ -757,7 +832,7 @@ class _ContractScreenState extends State<ContractScreen> {
               endDayOfWeak = _endDayOfWeakController.text;
               hoursPerDay = _hoursPerDayController.text;
               attendance = _attendanceController.text;
-              totalHours = '20';
+              totalHours = '0';
               overtime = '0';
               deduction = '0';
               bonus = '0';
