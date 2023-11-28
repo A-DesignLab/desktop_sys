@@ -168,6 +168,8 @@ class _ContractScreenState extends State<ContractScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
 
     List<Map<String, Object>> users = widget.user;
     return Scaffold(

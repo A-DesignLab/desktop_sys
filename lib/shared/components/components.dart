@@ -218,3 +218,48 @@ Future<void> dialogBuilder({
     },
   );
 }
+
+
+Widget customListTile(
+{
+  required context,
+  VoidCallback? listTileOnTap,
+  VoidCallback? trailingOnPress,
+  Widget? leadingWidget,
+  required String title,
+  String subTitle = '',
+  Color titleColor = Colors.black,
+  Color subTitleColor = Colors.grey,
+  double titleFontSize = 18,
+  double subTitleFontSize = 14,
+  IconData trailingIcon = Icons.arrow_back_ios_new_outlined,
+  double trailingIconSize = 20,
+  Color trailingIconColor = Colors.black,
+
+}) => ListTile(
+  onTap: listTileOnTap,
+  leading: leadingWidget,
+  title: Text(
+    title,
+    style: TextStyle(
+      fontSize: titleFontSize,
+      fontWeight: FontWeight.w500,
+      color: titleColor,
+    ),
+  ),
+  subtitle: Text(
+    subTitle,
+    style: TextStyle(
+      fontSize: subTitleFontSize,
+      color: subTitleColor,
+    ),
+  ),
+  trailing: IconButton(
+    onPressed: trailingOnPress,
+    icon: Icon(
+      trailingIcon,
+      size: trailingIconSize,
+      color: trailingIconColor,
+    ),
+  ),
+);

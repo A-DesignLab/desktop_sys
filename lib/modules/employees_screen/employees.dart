@@ -17,6 +17,8 @@ class AllEmployees extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     employeesList = CacheHelper.getData(key: 'employees');
+    var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
 
     final scaffoldKey = GlobalKey<ScaffoldState>();
     final users = user;
@@ -34,7 +36,7 @@ class AllEmployees extends StatelessWidget {
         ),
         title: const Text('Employees'),
         centerTitle: true,
-        actions: [
+        /*actions: [
           TextButton(
             onPressed: () {
               navigateTo(
@@ -47,7 +49,65 @@ class AllEmployees extends StatelessWidget {
               'Add Employee',
             ),
           ),
-        ],
+        ],*/
+      ),
+      endDrawer: Drawer(
+        child: ListView(
+          children: [
+            UserAccountsDrawerHeader(
+              decoration: const BoxDecoration(
+                color: Colors.pink,
+              ),
+              currentAccountPicture: const CircleAvatar(
+                radius: 40.0,
+                backgroundImage: NetworkImage(
+                  'https://www.kindpng.com/picc/m/21-214439_free-high-quality-person-icon-default-profile-picture.png',
+                ),
+              ),
+              accountName: const Text(''),
+              accountEmail: Container(
+                width: width * 0.5,
+                padding: const EdgeInsets.only(bottom: 15,left: 5,right: 60),
+                child: defaultButton(
+                  onPressed: ()
+                  {
+                    //navigateAndFinish(context, LoginScreen());
+                  },
+                  text: 'Login Now',
+                  backgroundColor: Colors.deepOrange,
+                ),
+              ),
+            ),
+            customListTile(
+              context: context,
+              listTileOnTap: ()
+              {
+              },
+              title: 'Add Employee',
+              subTitle: 'Create a new contract to add new employee in company with all details',
+              trailingIcon: Icons.arrow_forward_ios_rounded,
+            ),
+            ListTile(
+              title: const Text('Add Employee',),
+              subtitle: const Text('Create a new contract to add new employee in company with all details',),
+              trailing: IconButton(
+                onPressed: () {
+                  navigateTo(context, ContractScreen(
+                    user: users,
+                  ));
+                },
+                icon: const Icon(
+                  Icons.arrow_back_ios_new_outlined,
+                  size: 20.0,
+                ),
+              ),
+            ),
+            const Divider(
+              thickness: 1.5,
+            ),
+            ListTile(),
+          ],
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),

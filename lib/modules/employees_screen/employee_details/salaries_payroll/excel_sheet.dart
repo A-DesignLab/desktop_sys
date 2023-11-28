@@ -10,6 +10,8 @@ class OpenPdf extends StatefulWidget {
 class _OpenPdfState extends State<OpenPdf> {
   @override
   Widget build(BuildContext context) {
+    var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
     return const Placeholder();
   }
 

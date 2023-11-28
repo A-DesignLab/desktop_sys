@@ -11,6 +11,7 @@ class PayslipScreen extends StatefulWidget {
 }
 
 class _PayslipScreenState extends State<PayslipScreen> {
+
   late TextEditingController _bonusController;
   late TextEditingController _basicSalaryNote;
   late TextEditingController _substanceNote;
@@ -54,6 +55,8 @@ class _PayslipScreenState extends State<PayslipScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
 
     // ************************************************************//
     // Variable From Employee Model

@@ -8,6 +8,8 @@ class PayrollScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
 
     double basicSalary = double.parse(user['basic_salary'] as String);
     double substance = double.parse(user['substance'] as String);

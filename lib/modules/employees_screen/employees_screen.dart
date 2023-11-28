@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../home_layout/home_screen.dart';
 import '../../models/users_model.dart';
 import '../../shared/components/components.dart';
 import '../../shared/components/constants.dart';
@@ -11,12 +12,15 @@ class EmployeesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
+
     final managementEmployeesList = managementEmployees;
     final designersEmployeesList = designingEmployees;
     final engineersEmployeesList = engineeringEmployees;
     final supervisorsEmployeesList = supervisorsEmployees;
     final laboursEmployeesList = laboursEmployees;
-    var height = MediaQuery.of(context).size.height;
+
     List<String> employeesPosition = [
       'Management',
       'Designers',
@@ -28,6 +32,15 @@ class EmployeesScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: KPrimaryColor,
+        leading: IconButton(
+          onPressed: () {
+            navigateTo(context, const MyHomePage());
+          },
+          icon: const Icon(
+            Icons.arrow_back_ios_new_outlined,
+            size: 20.0,
+          ),
+        ),
         title: const Text('Employees'),
         centerTitle: true,
       ),

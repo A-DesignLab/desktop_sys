@@ -37,6 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(20.0),

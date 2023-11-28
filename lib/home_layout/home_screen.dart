@@ -40,7 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
       'Finance',
       'Projects',
       'Vat',
-      'Employees',
+      'Departments',
     ];
     final icons = [Icons.ac_unit, Icons.access_alarm, Icons.access_time, Icons.hearing];
 
