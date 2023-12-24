@@ -406,6 +406,7 @@ class HrPayslip(models.Model):
     # YTI TODO To rename. This method is not really an onchange, as it is not in any view
     # employee_id and contract_id could be browse records
     def onchange_employee_id(self, date_from, date_to, employee_id=False, contract_id=False):
+        print("\n\n Onchange Employee ID ===", self)
         #defaults
         res = {
             'value': {
@@ -423,7 +424,9 @@ class HrPayslip(models.Model):
         if (not employee_id) or (not date_from) or (not date_to):
             return res
         ttyme = datetime.combine(fields.Date.from_string(date_from), time.min)
+        print('\n\n Emp ===', employee_id)
         employee = self.env['hr.employee'].browse(employee_id)
+        print("\n\n Employee id ==", employee)
         locale = self.env.context.get('lang') or 'en_US'
         res['value'].update({
             'name': _('Salary Slip of %s for %s') % (employee.name, tools.ustr(babel.dates.format_date(date=ttyme, format='MMMM-y', locale=locale))),

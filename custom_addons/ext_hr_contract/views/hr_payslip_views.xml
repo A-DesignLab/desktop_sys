@@ -33,7 +33,7 @@
                 </group>
             </xpath>
             <xpath expr="//field[@name='credit_note']" position="after">
-                <field name="employee_bonus"/>
+                <field name="employee_bonus" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
             </xpath>
         </field>
     </record>

@@ -14,6 +14,7 @@
         'om_hr_payroll_account',
         'om_hr_payroll',
         'account',
+        'hr',
         'hr_attendance'
     ],
     'data': [
@@ -21,6 +22,7 @@
         'security/hr_payroll_security.xml',
         'data/hr_salary_rule_demo.xml',
         'data/resource_data.xml',
+        'views/res_users_view.xml',
         'views/hr_payslip_views.xml',
         'views/hr_attendance_view.xml',
         'views/hr_employee_views.xml',

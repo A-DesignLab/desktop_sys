@@ -1,5 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!--Basic Salary Rule Inherit-->
+    <record id="om_hr_payroll.hr_rule_basic" model="hr.salary.rule">
+        <field name="name">Basic Salary</field>
+        <field name="sequence" eval="1"/>
+        <field name="code">BASIC</field>
+        <field name="category_id" ref="om_hr_payroll.BASIC"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = basic_salary</field>
+    </record>
+
+    <!--Gross Salary Rule Inherit-->
+    <record id="om_hr_payroll.hr_rule_taxable" model="hr.salary.rule">
+        <field name="name">Gross</field>
+        <field name="sequence" eval="100"/>
+        <field name="code">GROSSEXT</field>
+        <field name="category_id" ref="om_hr_payroll.GROSS"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = categories.BASIC + categories.ALW</field>
+    </record>
+
+    <!--Net Salary Rule Inherit-->
+    <record id="om_hr_payroll.hr_rule_net" model="hr.salary.rule">
+        <field name="name">Net Salary</field>
+        <field name="sequence" eval="200"/>
+        <field name="code">NET</field>
+        <field name="category_id" ref="om_hr_payroll.NET"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = categories.BASIC + categories.ALW + categories.DED</field>
+    </record>
+
+     <!--Unpaid leaves Rule-->
+    <record id="hr_salary_rule_unpaid_leaves" model="hr.salary.rule">
+        <field name="name">Unpaid Leaves</field>
+        <field name="sequence" eval="100"/>
+        <field name="code">UNP</field>
+        <field name="category_id" ref="om_hr_payroll.DED"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = unpaid_leave</field>
+    </record>
 
     <record id="hr_salary_rule_substance" model="hr.salary.rule">
         <field name="amount_select">code</field>
@@ -45,16 +88,22 @@
     <record id="structure_base_employee" model="hr.payroll.structure">
         <field name="code">Employee</field>
         <field name="name">Employee Structure</field>
-        <field eval="[(6, 0, [('1'), ref('hr_salary_rule_gov_fees'), ref('hr_salary_rule_bonus'),
-        ref('hr_salary_rule_substance'), ('3'), ('5'), ('7'), ('2'), ('8')])]" name="rule_ids"/>
+        <field eval="[(6, 0, [ref('om_hr_payroll.hr_rule_basic'), ref('om_hr_payroll.hr_rule_taxable'),
+        ref('hr_salary_rule_gov_fees'), ref('hr_salary_rule_bonus'),
+        ref('hr_salary_rule_substance'), ref('om_hr_payroll.hr_rule_hra'),
+        ref('om_hr_payroll.hr_rule_da'), ref('om_hr_payroll.hr_rule_travel'),
+        ref('om_hr_payroll.hr_rule_meal'), ref('om_hr_payroll.hr_rule_medical'),
+        ref('om_hr_payroll.hr_rule_net')])]" name="rule_ids"/>
         <field name="company_id" ref="base.main_company"/>
     </record>
 
     <record id="structure_base_worker" model="hr.payroll.structure">
         <field name="code">Worker</field>
         <field name="name">Worker Structure</field>
-        <field eval="[(6, 0, [('1'), ref('hr_salary_rule_gov_fees'), ref('hr_salary_rule_deduction_bonus'),
-         ref('hr_salary_rule_allowance'), ref('hr_salary_rule_substance'), ('3'), ('5'), ('7'), ('2'), ('8')])]" name="rule_ids"/>
+        <field eval="[(6, 0, [ref('om_hr_payroll.hr_rule_basic'), ref('hr_salary_rule_gov_fees'),
+        ref('hr_salary_rule_deduction_bonus'), ref('hr_salary_rule_allowance'), ref('hr_salary_rule_substance'),
+        ref('om_hr_payroll.hr_rule_hra'), ref('om_hr_payroll.hr_rule_travel'), ref('om_hr_payroll.hr_rule_medical'),
+        ref('om_hr_payroll.hr_rule_taxable'), ref('om_hr_payroll.hr_rule_net'), ref('hr_salary_rule_unpaid_leaves')])]" name="rule_ids"/>
         <field name="company_id" ref="base.main_company"/>
     </record>
 

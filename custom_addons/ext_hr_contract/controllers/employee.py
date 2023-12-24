@@ -1,47 +1,160 @@
 from odoo import http, exceptions
-from odoo.http import request
+from odoo.http import request, Response
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class EmployeeController(http.Controller):
-    @http.route(['/get_employee'], type='json', website=True, auth="user")
-    def get_employee(self):
-        employee_ids = request.env['hr.employee'].sudo().search([])
-        employee = []
-        for rec in employee_ids:
-            vals = {
-                "Employee name": rec.name,
-                "id": rec.id,
-                "Department": rec.department_id.name,
-                "Job": rec.job_id.name
-            }
-            employee.append(vals)
-        data = {'status': 200, 'response': employee, 'message': 'Success'}
-        return data
 
-    @http.route(['/create_employee'], type='json', auth="user")
-    def create_employee(self, **rec):
+    def _check_user_token(self, api_token):
+        current_user = False
+        if api_token:
+            current_user = request.env['res.users'].sudo().search([('api_token', '=', api_token)])
+        return current_user
+
+    @http.route('/get_employee', type='json', website=True, methods=['GET'], auth="public", csrf=True)
+    def get_employee(self):
         if request.get_json_data():
-            if rec['name']:
-                job_id = self.get_or_create_job_pos(rec['job_position'])
-                dep_id = self.get_or_create_department(rec['department_id'])
+            data = request.get_json_data()
+            error_list = []
+            try:
+                if not data.get('api_token'):
+                    error_list.append({"api_token": "API Token is required !!!"})
+                if error_list:
+                    Response.status = "400"
+                    return {"code": "RequiredField", "Error": error_list}
+                current_user = self._check_user_token(data.get('api_token', ''))
+                if not current_user:
+                    Response.status = "400"
+                    return {"error": "Access Denied !!! Please Provide Valid Token"}
+                employee_ids = request.env['hr.employee'].with_user(current_user).search([])
+                employee = []
+                for rec in employee_ids:
+                    vals = {
+                        "employee_name": rec.name,
+                        "employee_id": rec.id,
+                        "department": rec.department_id.name,
+                        "job": rec.job_id.name
+                    }
+                    employee.append(vals)
+                data = {'status': 200, 'message': 'All Employee Details', 'response': employee}
+                return data
+
+            except Exception as e:
+                _logger.info("Error Message : %s" % str(e))
+                Response.status = "400"
+                return {"status": "failed", "error": str(e)}
+
+    @http.route('/create_employee', type='json', methods=['POST'], auth="public", csrf=True)
+    def create_employee(self, **rec):
+        data = request.get_json_data()
+        error_list = []
+        try:
+            if not data.get('api_token'):
+                error_list.append({"api_token": "API Token is required !!!"})
+            if error_list:
+                # Response.status = "400"
+                return {"code": "RequiredField", "Error": error_list}
+            current_user = self._check_user_token(data.get('api_token', ''))
+            if not current_user:
+                # Response.status = "400"
+                return {"error": "Access Denied !!! Please Provide Valid Token"}
+            employee_type = data.get('employee_type')
+            if data.get('name'):
+                if employee_type == 'worker':
+                    calendar_resource = request.env['resource.calendar'].sudo().search(
+                        [('name', '=', 'Standard 48 hours/week')], limit=1)
+                else:
+                    calendar_resource = request.env['resource.calendar'].sudo().search(
+                        [('name', '=', 'Standard 40 hours/week')], limit=1)
+                job_id = self.get_or_create_job_pos(data.get('job_position'))
+                dep_id = self.get_or_create_department(data.get('department_id'))
                 vals = {
-                    'name': rec['name'],
+                    'name': data.get('name'),
                     'department_id': dep_id,
-                    'employee_type': rec['employee_type'],
-                    # 'resource_calendar_id': rec['stander_hours'],
-                    'tz': rec['time_zone'],
+                    'employee_type': data.get('employee_type'),
+                    'resource_calendar_id': calendar_resource.id,
+                    'tz': 'Asia/Riyadh',
                     'job_id': job_id,
                 }
-                existing_employee = request.env['hr.employee'].sudo().search([
-                    ('name', '=', vals['name'])
+                existing_employee = request.env['hr.employee'].with_user(current_user).search([
+                    ('name', '=', data.get('name'))
                 ])
 
                 if existing_employee:
+                    # Response.status = "400"
                     return {'error': 'Employee with the same name already exists'}
                 else:
-                    new_employee = request.env['hr.employee'].sudo().create(vals)
-                    args = {'success': True, 'message': 'Success', 'id': new_employee.id}
-        return args
+                    new_employee = request.env['hr.employee'].with_user(current_user).create(vals)
+                    args = {'success': True, 'message': 'Employee Created', 'id': new_employee.id}
+                    return args
+
+        except Exception as e:
+            _logger.info("Error Message : %s" % str(e))
+            # Response.status = "400"
+            return {"status": "failed", "error": str(e)}
+
+    @http.route('/update_employee', type='json', auth="public", methods=['POST'], csrf=True)
+    def update_employee(self, **rec):
+        if request.get_json_data():
+            data = request.get_json_data()
+            error_list = []
+            try:
+                if not data.get('api_token'):
+                    error_list.append({"api_token": "API Token is required !!!"})
+                if not data.get('employee_id'):
+                    error_list.append({"employee_id": "Employee ID field is required !!!"})
+                if error_list:
+                    # Response.status = "400"
+                    return {"code": "RequiredField", "Error": error_list}
+                current_user = self._check_user_token(data.get('api_token', ''))
+                if not current_user:
+                    # Response.status = "400"
+                    return {"error": "Access Denied !!! Please Provide Valid Token"}
+                employee = request.env['hr.employee'].with_user(current_user).search([('id', '=', data.get('employee_id'))])
+                data.pop('api_token')
+                data.pop('employee_id')
+                if employee:
+                    employee.with_user(current_user).write(data)
+                    return {'success': True, 'message': 'Employee Updated Successfully', "id": employee.id, "Name": employee.name}
+                else:
+                    # Response.status = "400"
+                    return {'success': False, 'message': 'Employee Not Found !!!'}
+
+            except Exception as e:
+                _logger.info("Error Message : %s" % str(e))
+                # Response.status = "400"
+                return {"status": "failed", "error": str(e)}
+
+    @http.route('/delete_employee', type='json', auth='public', methods=['POST'], csrf=True)
+    def delete_employee(self, **kwargs):
+        data = request.get_json_data()
+        error_list = []
+        try:
+            if not data.get("api_token", ''):
+                error_list.append({"api_token": "Api Token is required !!!"})
+            if not data.get("employee_id", ''):
+                error_list.append({'employee_id': "Employee Field is required !!!"})
+            if error_list:
+                # Response.status = "400"
+                return {"code": "RequiredField", "message": "Cannot be empty", "error": error_list}
+            current_user = self._check_user_token(data.get('api_token', ''))
+            if not current_user:
+                # Response.status = "400"
+                return {"error": "Access Denied !!! Please Provide Valid Token"}
+
+            employee = request.env['hr.employee'].with_user(current_user).search([('id', '=', data.get('employee_id'))])
+            if employee:
+                details = {'employee_id': employee.id, 'employee_name': employee.name}
+                employee.with_user(current_user).unlink()
+                return {'message': 'Employee deleted successfully', "Details": details}
+            else:
+                # Response.status = "400"
+                return {'error': 'Employee not found'}
+
+        except Exception as e:
+            # Response.status = "400"
+            return {"status": "failed", "error": str(e)}
 
     def get_or_create_job_pos(self, job_name):
         # Check if the job already exists
@@ -64,39 +177,3 @@ class EmployeeController(http.Controller):
             # Create a new department
             new_dep = request.env['hr.department'].sudo().create({'name': dep_name})
             return new_dep.id
-
-    @http.route(['/update_employee'], type='json', auth="user")
-    def update_employee(self, **rec):
-        if request.get_json_data():
-            if rec['id']:
-                employee = request.env['hr.employee'].sudo().search([('id', '=', rec['id'])])
-                if employee:
-                    employee.sudo().write(rec)
-                args = {'success': True, 'message': 'Success update'}
-        return args
-
-    @http.route('/delete_employee', type='json', auth='user', methods=['POST'])
-    def delete_employee(self, **kwargs):
-        try:
-            employee_id = kwargs.get('employee_id')
-
-            if employee_id:
-                # Check if the user has the necessary permissions to delete employees
-                if request.env.user.has_group('hr.group_hr_manager'):
-                    request.env['hr.leave'].sudo().search([('employee_id', '=', int(employee_id))]).unlink()
-                    request.env['hr.payslip'].sudo().search([('employee_id', '=', int(employee_id))]).unlink()
-                    # Delete the employee
-                    employee = request.env['hr.employee'].browse(int(employee_id))
-                    if employee:
-                        employee.sudo().unlink()
-                        return {'message': 'Employee deleted successfully'}
-                    else:
-                        return {'error': 'Employee not found'}
-                else:
-                    return {'error': 'Permission denied'}
-            else:
-                return {'error': 'Employee ID is required'}
-        except exceptions.AccessError as e:
-            return {'error': 'Access denied'}
-        except Exception as e:
-            return {'error': str(e)}

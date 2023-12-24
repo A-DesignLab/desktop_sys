@@ -4,7 +4,7 @@ from odoo import _, api, fields, models
 
 
 class HrEmployeeBaseExtend(models.AbstractModel):
-    _inherit = "hr.employee"
+    _inherit = "hr.employee.base"
 
     employee_type = fields.Selection(selection_add=[
         ('worker', 'Worker')

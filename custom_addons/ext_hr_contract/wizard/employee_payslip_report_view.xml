@@ -12,7 +12,7 @@
                         <field name="end_date"/>
                     </group>
                     <group>
-                        <field name="employee_id"/>
+                        <field name="employee_id" widget="many2many_tags"/>
                     </group>
                 </group>
                 <footer>

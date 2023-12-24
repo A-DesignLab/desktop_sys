@@ -4,52 +4,83 @@ from odoo.http import request
 
 class SalaryStructureController(http.Controller):
 
-    @http.route('/create_salary_struc', type='json', auth='user', methods=['POST'])
+    def _check_user_token(self, api_token):
+        current_user = False
+        if api_token:
+            current_user = request.env['res.users'].sudo().search([('api_token', '=', api_token)])
+        return current_user
+
+    @http.route('/create_salary_struc', type='json', auth='public', methods=['POST'])
     def create_salary_struc(self, **rec):
-        if request.get_json_data():
-            if rec['name']:
-                vals = {
-                    'name': rec['name'],
-                    'code': rec['code'],
-                    'rule_ids': rec['rule_ids'],
-                }
-                new_struc = request.env['hr.payroll.structure'].sudo().create(vals)
-                return {'success': True, 'message': 'Salary Structure created successfully!', 'salary_structure_id': new_struc.id}
-
-    @http.route(['/get_salary_struc'], type='json', website=True, auth="user", methods=['GET'])
-    def get_salary_struc(self):
-        struc_ids = request.env['hr.payroll.structure'].sudo().search([])
-        structure = []
-        for rec in struc_ids:
-            vals = {
-                "structure name": rec.name,
-                "id": rec.id,
-            }
-            structure.append(vals)
-        data = {'status': 200, 'response': structure, 'message': 'Success'}
-        return data
-
-    @http.route('/delete_salary_struc', type='json', auth='user', methods=['POST'])
-    def delete_struc(self, **kwargs):
+        data = request.get_json_data()
+        error_list = []
         try:
-            structure_id = kwargs.get('id')
+            if not data.get("api_token", ''):
+                error_list.append({"api_token": "Api Token is required !!!"})
+            if error_list:
+                return {"code": "RequiredField", "message": "Cannot be empty", "error": error_list}
+            current_user = self._check_user_token(data.get('api_token', ''))
+            if not current_user:
+                return {"error": "Access Denied !!! Please Provide Valid Token"}
+            vals = {
+                'name': data.get('name'),
+                'code': data.get('code'),
+                'rule_ids': data.get('rule_ids'),
+            }
+            new_struc = request.env['hr.payroll.structure'].with_user(current_user).create(vals)
+            return {'success': True, 'message': 'Salary Structure created successfully!', 'salary_structure_id': new_struc.id}
+        except Exception as e:
+            return {"status": "failed", "error": str(e)}
+
+    @http.route(['/get_salary_struc'], type='json', website=True, auth="public", methods=['GET'])
+    def get_salary_struc(self):
+        data = request.get_json_data()
+        error_list = []
+        try:
+            if not data.get("api_token", ''):
+                error_list.append({"api_token": "Api Token is required !!!"})
+            if error_list:
+                return {"code": "RequiredField", "message": "Cannot be empty", "error": error_list}
+            current_user = self._check_user_token(data.get('api_token', ''))
+            if not current_user:
+                return {"error": "Access Denied !!! Please Provide Valid Token"}
+            struc_ids = request.env['hr.payroll.structure'].with_user(current_user).search([])
+            structure = []
+            for rec in struc_ids:
+                vals = {
+                    "structure name": rec.name,
+                    "id": rec.id,
+                }
+                structure.append(vals)
+            data = {'status': 200, 'response': structure, 'message': 'Success'}
+            return data
+        except Exception as e:
+            return {"status": "failed", "error": str(e)}
+
+    @http.route('/delete_salary_struc', type='json', auth='public', methods=['POST'])
+    def delete_struc(self):
+        data = request.get_json_data()
+        error_list = []
+        try:
+            if not data.get("api_token", ''):
+                error_list.append({"api_token": "Api Token is required !!!"})
+            if error_list:
+                return {"code": "RequiredField", "message": "Cannot be empty", "error": error_list}
+            current_user = self._check_user_token(data.get('api_token', ''))
+            if not current_user:
+                return {"error": "Access Denied !!! Please Provide Valid Token"}
+            structure_id = data.get('id')
 
             if structure_id:
-                # Check if the user has the necessary permissions to delete employees
-                if request.env.user.has_group('hr.group_hr_manager'):
-                    # Delete the employee
-                    structure = request.env['hr.payroll.structure'].browse(int(structure_id))
-                    if structure:
-                        structure.sudo().unlink()
-                        return {'message': 'Salary structure deleted successfully'}
-                    else:
-                        return {'error': 'Salary structure not found'}
+                structure = request.env['hr.payroll.structure'].browse(int(structure_id))
+                if structure:
+                    structure.with_user(current_user).unlink()
+                    return {'message': 'Salary structure deleted successfully'}
                 else:
-                    return {'error': 'Permission denied'}
+                    return {'error': 'Salary structure not found'}
+
             else:
                 return {'error': 'Salary structure ID is required'}
-        except exceptions.AccessError as e:
-            return {'error': 'Access denied'}
         except Exception as e:
             return {'error': str(e)}
 

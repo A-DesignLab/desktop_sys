@@ -20,7 +20,7 @@ class EmployeePayslipReport(models.TransientModel):
     _name = 'employee.payslip.report'
     _description = 'Employee Payslip Report'
 
-    employee_id = fields.Many2one(string="Employee", comodel_name='hr.employee')
+    employee_id = fields.Many2many(string="Employee", comodel_name='hr.employee')
     start_date = fields.Date("Start Date", required=True)
     end_date = fields.Date("End Date", required=True)
 
@@ -39,7 +39,6 @@ class EmployeePayslipReport(models.TransientModel):
         return p_month, salary, hra_alw, travel_alw, medical_alw, gov_fees_alw, substance, total, remaining_total
 
     def print_report(self):
-
         if self.end_date < self.start_date:
             raise ValidationError('Sorry, End Date Must be greater Than Start Date...')
         search_domain = []
@@ -47,7 +46,7 @@ class EmployeePayslipReport(models.TransientModel):
         search_domain.append(('date_from', '>=', self.start_date))
         search_domain.append(('date_from', '<=', self.end_date))
         if self.employee_id:
-            search_domain.append(('employee_id', '=', self.employee_id.id))
+            search_domain.append(('employee_id', 'in', self.employee_id.ids))
         else:
             all_employee = self.env['hr.employee'].search([])
             search_domain.append(('employee_id', 'in', all_employee.ids))
@@ -68,10 +67,11 @@ class EmployeePayslipReport(models.TransientModel):
                 payslip_dict['medical'] = salary_details[4]
                 payslip_dict['gov_fess'] = salary_details[5]
                 payslip_dict['substance'] = salary_details[6]
-                payslip_dict['total'] = salary_details[8]
-                payslip_dict['remaining_total'] = salary_details[9]
+                payslip_dict['total'] = salary_details[7]
+                payslip_dict['remaining_total'] = salary_details[8]
                 salary_details_list.append(payslip_dict)
                 employee_payslip_dict[payslip.employee_id] = salary_details_list
+
             else:
                 payslip_dict = {}
                 salary_details = self._get_payslip_data(payslip=payslip)
@@ -82,8 +82,8 @@ class EmployeePayslipReport(models.TransientModel):
                 payslip_dict['medical'] = salary_details[4]
                 payslip_dict['gov_fess'] = salary_details[5]
                 payslip_dict['substance'] = salary_details[6]
-                payslip_dict['total'] = salary_details[8]
-                payslip_dict['remaining_total'] = salary_details[9]
+                payslip_dict['total'] = salary_details[7]
+                payslip_dict['remaining_total'] = salary_details[8]
                 salary_details_list.append(payslip_dict)
                 employee_payslip_dict.update({payslip.employee_id: salary_details_list})
 
@@ -101,7 +101,6 @@ class EmployeePayslipReport(models.TransientModel):
 
         row = 1
         col = 0
-
         for employee_id, value in employee_payslip_dict.items():
             worksheet.write_merge(row, row + 2, col, col, employee_id.name, format0)
             worksheet.col(col).width = 256 * 20

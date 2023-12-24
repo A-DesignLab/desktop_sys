@@ -7,6 +7,7 @@ from datetime import datetime
 from dateutil import relativedelta
 from odoo.tools import date_utils
 from odoo.exceptions import UserError
+import pytz
 
 ROUNDING_FACTOR = 16
 from collections import defaultdict
@@ -87,57 +88,110 @@ class EmployeeAnnualCost(models.Model):
 
     def get_worked_day_lines(self, contracts, date_from, date_to):
         res = super(EmployeeAnnualCost, self).get_worked_day_lines(self.contract_id, self.date_from, self.date_to)
-        if self.employee_id.employee_type in ['worker']:
-            attendances = self.get_attendance_from_employee(date_from=self.date_from, date_to=self.date_to,
-                                                            employee=self.employee_id)
-            diff_hours = 0
-            worked_hours = 0.0
-            days = 0
-            day_hours = defaultdict(float)
-            for attend in attendances:
-                worked_hours_format = "{:.2f}".format(attend.worked_hours)
-                if float(worked_hours_format) == 0.00:
-                    raise UserError("No Worked Hours Found in Attendance Line")
-                if worked_hours_format:
-                    diff_hours += attend.worked_hours - attend.total_hours
-                    worked_hours += attend.worked_hours
-                    day_hours[attend.check_in.date()] += (attend.check_in - attend.check_out).total_seconds() / 3600
-            if day_hours:
-                days = sum(
-                    float_utils.round(ROUNDING_FACTOR * day_hours[day] / day_hours[day] / ROUNDING_FACTOR)
-                    for day in day_hours
-                )
-            if diff_hours > 0:
-                over_time = {
-                    'name': "OverTime",
-                    'sequence': 3,
-                    'code': 'OVER',
-                    'number_of_days': diff_hours / ROUNDING_FACTOR / 3600,
-                    'number_of_hours': diff_hours,
-                    'contract_id': self.contract_id.id,
-                }
-                res.append(over_time)
-            if diff_hours < 0:
-                deduction = {
-                    'name': "Deduction",
-                    'sequence': 3,
-                    'code': 'DEDUCT',
-                    'number_of_days': diff_hours / ROUNDING_FACTOR / 3600,
-                    'number_of_hours': diff_hours,
-                    'contract_id': self.contract_id.id,
-                }
-                res.append(deduction)
-            if day_hours and days:
-                attendances = {
-                    'name': _("Attendance"),
-                    'sequence': 3,
-                    'code': 'WORK100',
-                    'number_of_days': 0.0,
-                    'number_of_hours': worked_hours - diff_hours,
-                    'contract_id': self.contract_id.id,
-                }
-                res.append(attendances)
-            res[0].update({'code': 'TOTAL_DAYS'})
+        # if self.employee_id.employee_type in ['worker']:
+        attendances = self.get_attendance_from_employee(date_from=self.date_from, date_to=self.date_to, employee=self.employee_id)
+
+        # Find Working Days Week days of employee
+        working_week_days = []
+        working_hours = self.employee_id.resource_calendar_id
+        for attendance in working_hours.attendance_ids:
+            working_week_days.append(attendance.dayofweek)
+        week_days = set(working_week_days)
+        week_days_list = list(week_days)
+
+        # Find Public Days
+        public_holidays_dates = []
+        public_holidays = self.employee_id._get_public_holidays(date_start=self.date_from, date_end=self.date_to).sorted('date_from')
+        for holiday in public_holidays:
+            public_holidays_dates.append(holiday.date_from.date())
+
+        diff_hours = 0
+        public_leave_worked_hours = 0
+        week_day_worked_hours = 0
+        worked_hours = 0.0
+        days = 0
+        day_hours = defaultdict(float)
+        for attend in attendances:
+            # Check Worked Hours in attendance
+            worked_hours_format = "{:.2f}".format(attend.worked_hours)
+            if float(worked_hours_format) == 0.00:
+                raise UserError("No Worked Hours Found in Attendance Line")
+
+            check_in = attend.check_in.date()
+            weekday = str(check_in.weekday())
+
+            # Check Worked On WEEK DAYS
+            if weekday not in week_days_list:
+                week_day_worked_hours += attend.worked_hours
+
+            # Check Worked On Public Holiday
+            if check_in in public_holidays_dates:
+                public_leave_worked_hours += attend.worked_hours
+
+            # Find OverTime Or Deduction Hours in "diff_hours""
+            if worked_hours_format:
+                diff_hours += attend.worked_hours - attend.total_hours
+                worked_hours += attend.worked_hours
+                day_hours[attend.check_in.date()] += (attend.check_in - attend.check_out).total_seconds() / 3600
+        if day_hours:
+            days = sum(
+                float_utils.round(ROUNDING_FACTOR * day_hours[day] / day_hours[day] / ROUNDING_FACTOR)
+                for day in day_hours
+            )
+        if diff_hours > 0:
+            over_time = {
+                'name': "OverTime",
+                'sequence': 3,
+                'code': 'OVER',
+                'number_of_days': diff_hours / ROUNDING_FACTOR / 3600,
+                'number_of_hours': diff_hours,
+                'contract_id': self.contract_id.id,
+            }
+            res.append(over_time)
+        if diff_hours < 0:
+            deduction = {
+                'name': "Deduction",
+                'sequence': 3,
+                'code': 'DEDUCT',
+                'number_of_days': diff_hours / ROUNDING_FACTOR / 3600,
+                'number_of_hours': diff_hours,
+                'contract_id': self.contract_id.id,
+            }
+            res.append(deduction)
+        if public_leave_worked_hours:
+            public_leaves_worked_hour = {
+                'name': "Worked On Public Leaves",
+                'sequence': 4,
+                'code': 'WPL',
+                'number_of_days': public_leave_worked_hours / ROUNDING_FACTOR / 3600,
+                'number_of_hours': public_leave_worked_hours,
+                'contract_id': self.contract_id.id,
+            }
+            res.append(public_leaves_worked_hour)
+        if week_day_worked_hours:
+            week_day_worked_hour = {
+                'name': "Worked On Week Days",
+                'sequence': 5,
+                'code': 'WWD',
+                'number_of_days': week_day_worked_hours / ROUNDING_FACTOR / 3600,
+                'number_of_hours': week_day_worked_hours,
+                'contract_id': self.contract_id.id,
+            }
+            res.append(week_day_worked_hour)
+        if day_hours and days:
+            attendances = {
+                'name': _("Attendance"),
+                'sequence': 6,
+                'code': 'WORK100',
+                'number_of_days': 0.0,
+                'number_of_hours': worked_hours - diff_hours - public_leave_worked_hours - week_day_worked_hours,
+                'contract_id': self.contract_id.id,
+            }
+            res.append(attendances)
+        res[0].update({'code': 'TOTAL_DAYS'})
+        for rec in res:
+            if 'Unpaid' in rec['name']:
+                rec.update({'code': 'unpaid'})
         return res
 
     @api.model
@@ -245,12 +299,14 @@ class EmployeeAnnualCost(models.Model):
         attendance_work_line = self.worked_days_line_ids.filtered(lambda r: r.code == "WORK100")
         input_line_ids = self.input_line_ids
         amount = 0
+        overtime = 0
         baselocaldict.update({
             'input_amount': amount,
             'hours_rate': 0.0,
             'overtime': 0.0,
             'deduction': 0.0,
-            'basic_salary': 0
+            'basic_salary': 0,
+            'unpaid_leave': 0
         })
         for inputs in input_line_ids:
             amount += inputs.amount
@@ -264,13 +320,33 @@ class EmployeeAnnualCost(models.Model):
         #     per_day_salary = wage / total_working_days
         #     working_hour = self.employee_id.resource_calendar_id.hours_per_day
         per_day_salary = wage / 30
-        working_hour = 8
+        working_hour = self.employee_id.resource_calendar_id.hours_per_day
         if working_hour:
             hour_rate = per_day_salary / working_hour
-            print(hour_rate)
             baselocaldict.update({
-                'basic_salary': attendance_work_line.number_of_hours * hour_rate or 0
+                'basic_salary': attendance_work_line.number_of_hours * hour_rate or 0,
             })
+            if self.worked_days_line_ids.filtered(lambda r: r.code == "WWD"):
+                worked_on_day_hours = self.worked_days_line_ids.filtered(lambda r: r.code == "WWD").number_of_hours
+                overtime += float(worked_on_day_hours) * hour_rate
+                sorted_rules += self.env['hr.salary.rule'].search([('code', '=', 'EXTBONUS')])
+                baselocaldict.update({
+                    'overtime': overtime
+                })
+
+            if self.worked_days_line_ids.filtered(lambda r: r.code == "WPL"):
+                worked_on_public_leave = self.worked_days_line_ids.filtered(lambda r: r.code == "WPL").number_of_hours
+                overtime += float(worked_on_public_leave) * hour_rate
+                sorted_rules += self.env['hr.salary.rule'].search([('code', '=', 'EXTBONUS')])
+                baselocaldict.update({
+                    'overtime': overtime
+                })
+
+            if self.worked_days_line_ids.filtered(lambda r: r.code == "unpaid"):
+                leave_hours = self.worked_days_line_ids.filtered(lambda r: r.code == "unpaid").number_of_hours
+                baselocaldict.update({
+                    'unpaid_leave': leave_hours * hour_rate,
+                })
             if self.worked_days_line_ids.filtered(lambda r: r.code == "DEDUCT"):
                 deduct_hours = self.worked_days_line_ids.filtered(lambda r: r.code == "DEDUCT").number_of_hours
                 sorted_rules += self.env['hr.salary.rule'].search([('code', '=', 'DECBONUS')])
@@ -278,17 +354,18 @@ class EmployeeAnnualCost(models.Model):
                     'overtime': 0.0,
                     'deduction': float(deduct_hours) * hour_rate
                 })
-
             else:
                 extra_hours = self.worked_days_line_ids.filtered(lambda r: r.code == "OVER").number_of_hours
                 sorted_rules += self.env['hr.salary.rule'].search([('code', '=', 'EXTBONUS')])
+                overtime += float(extra_hours) * hour_rate
                 baselocaldict.update({
                     'deduction': 0.0,
-                    'overtime': float(extra_hours) * hour_rate
+                    'overtime': overtime
                 })
         for contract in contracts:
             employee = contract.employee_id
             localdict = dict(baselocaldict, employee=employee, contract=contract)
+
             for rule in sorted_rules:
                 key = rule.code + '-' + str(contract.id)
                 localdict['result'] = None

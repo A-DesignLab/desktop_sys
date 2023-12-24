@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_users_view_form_extend" model="ir.ui.view">
+        <field name="name">res.users.form.extend</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <field name="login" position="after">
+                <group>
+                    <field name="api_token" invisible="1"/>
+                </group>
+            </field>
+        </field>
+    </record>
+</odoo>
